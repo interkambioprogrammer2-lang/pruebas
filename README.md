@@ -1,46 +1,144 @@
-# Getting Started with Create React App
+# ferias-frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Descripción
+-----------
+Repositorio frontend de la aplicación "ferias-frontend" creado con Create React App (TypeScript). Contiene la interfaz de usuario y los assets.
 
-## Available Scripts
+Tecnologías principales
+-----------------------
+- React 19
+- TypeScript
+- react-scripts 5
+- Axios
+- react-router-dom
 
-In the project directory, you can run:
+Requisitos previos
+------------------
+- Git
+- Node.js 18.x LTS (recomendado)
+- npm >= 8 o yarn
+- Opcional: nvm para gestionar versiones de Node
 
-### `npm start`
+Clonar
+------
+Usando HTTPS:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```bash
+git clone https://github.com/USERNAME/REPO.git
+cd ferias-frontend
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Usando SSH:
 
-### `npm test`
+```bash
+git clone git@github.com:USERNAME/REPO.git
+cd ferias-frontend
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Reemplaza `USERNAME/REPO` por la ruta real del repositorio.
 
-### `npm run build`
+Instalación
+-----------
+Instalar dependencias:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm install
+# o
+# yarn install
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Variables de entorno
+--------------------
+Si la aplicación necesita configuración (por ejemplo la URL de la API), crea un archivo `.env.local` en la raíz con variables de ejemplo:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+REACT_APP_API_URL=http://localhost:8000
+```
 
-### `npm run eject`
+Asegúrate de no versionar datos sensibles.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Scripts útiles
+--------------
+- `npm start` — Ejecuta la app en modo desarrollo (http://localhost:3000)
+- `npm test` — Ejecuta el runner de tests en modo watch
+- `npm run build` — Crea la versión de producción en la carpeta `build`
+- `npm run eject` — Eject (operación irreversible)
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Ejecutar en desarrollo
+----------------------
+Ejecutar el servidor de desarrollo:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```bash
+npm start
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+La app recargará automáticamente al editar archivos.
 
-## Learn More
+Ejecutar tests
+--------------
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+npm test
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Build y despliegue
+------------------
+Generar build de producción:
+
+```bash
+npm run build
+```
+
+Servir la build localmente (ejemplo con `serve`):
+
+```bash
+npx serve -s build -l 5000
+```
+
+Desplegar la carpeta `build/` a servicios como Vercel, Netlify o Surge.
+
+Nota para Windows
+-----------------
+Si el puerto 3000 está en uso, cambiarlo:
+
+- PowerShell:
+
+```powershell
+$env:PORT=3001; npm start
+```
+
+- CMD:
+
+```cmd
+set PORT=3001&& npm start
+```
+
+Resolución de problemas comunes
+-------------------------------
+- Errores de dependencias: borrar `node_modules` y `package-lock.json`, luego `npm install`.
+- Puerto 3000 en uso: usar la variable PORT como se indicó arriba.
+- Limpiar cache de npm: `npm cache clean --force`.
+- Problemas de versión de Node: usar `nvm` para cambiar de versión.
+
+Contribuir
+----------
+1. Haz fork del repositorio
+2. Crea una rama (`feature/nueva-funcion`)
+3. Realiza cambios y push
+4. Abre un Pull Request describiendo los cambios
+
+Documentación adicional
+-----------------------
+Existe el archivo `DOCUMENTACION_CLONAR.md` con una guía extendida de clonación e instalación.
+
+Licencia
+--------
+Revisa el archivo `LICENSE` en la raíz del repositorio (si existe) para detalles de la licencia.
+
+Contacto y soporte
+------------------
+Para problemas o dudas, abre un issue en el repositorio de GitHub.
+
+---
+
+Archivo actualizado: README.md

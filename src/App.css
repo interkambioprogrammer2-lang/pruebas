@@ -1,0 +1,286 @@
+/* ====== Estilos globales ====== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #f0f2f5;
+  color: #1a1a2e;
+  line-height: 1.6;
+  padding: 30px 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+  padding: 30px 35px;
+}
+
+/* ====== Enlaces ====== */
+a {
+  color: #2c6fce;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+a:hover {
+  color: #1e4f9a;
+  text-decoration: underline;
+}
+
+/* ====== Encabezados ====== */
+h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #0f172a;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 10px;
+}
+
+h2 {
+  font-size: 1.5rem;
+  margin: 25px 0 15px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+/* ====== Párrafos y textos ====== */
+p {
+  margin: 8px 0;
+  font-size: 1rem;
+}
+
+strong {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+/* ====== Botones ====== */
+button {
+  background-color: #2c6fce;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 5px 8px 5px 0;
+}
+button:hover:not(:disabled) {
+  background-color: #1e4f9a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(44, 111, 206, 0.3);
+}
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+button:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Botón secundario */
+button.secondary {
+  background-color: #e9ecef;
+  color: #2d3748;
+}
+button.secondary:hover:not(:disabled) {
+  background-color: #d1d5db;
+}
+
+/* ====== Formularios ====== */
+form {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 25px;
+  border: 1px solid #e2e8f0;
+}
+
+form input,
+form select {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  flex: 1 1 200px;
+  background: white;
+  transition: border-color 0.2s;
+}
+form input:focus,
+form select:focus {
+  outline: none;
+  border-color: #2c6fce;
+  box-shadow: 0 0 0 2px rgba(44, 111, 206, 0.2);
+}
+
+form button {
+  flex: 0 0 auto;
+}
+
+/* ====== Lista de ferias ====== */
+ul {
+  list-style: none;
+  margin-top: 15px;
+}
+
+li {
+  background: white;
+  padding: 16px 20px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-left: 5px solid #2c6fce;
+  display: flex;
+  align-items: center;
+  font-size: 1.05rem;
+}
+li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+li a {
+  flex: 1;
+  color: #1e293b;
+  font-weight: 500;
+}
+li a:hover {
+  text-decoration: none;
+}
+li .status-badge {
+  margin-left: auto;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* ====== Badges de estado ====== */
+.status-DRAFT { background: #fef3c7; color: #92400e; }
+.status-DISPATCHED { background: #dbeafe; color: #1e40af; }
+.status-CLOSED { background: #dcfce7; color: #166534; }
+
+/* ====== Tablas ====== */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  margin: 20px 0;
+}
+
+th {
+  background: #f1f5f9;
+  color: #334155;
+  font-weight: 600;
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 2px solid #e2e8f0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.95rem;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+tr:hover td {
+  background: #f8fafc;
+}
+
+/* ====== Secciones (tarjetas) ====== */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+/* ====== Autocompletado ====== */
+.autocomplete-wrapper {
+  position: relative;
+}
+.autocomplete-list {
+  position: absolute;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  width: 100%;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  margin-top: 4px;
+}
+.autocomplete-list li {
+  padding: 10px 15px;
+  cursor: pointer;
+  border-bottom: none;
+  border-left: none;
+  border-radius: 0;
+  margin: 0;
+}
+.autocomplete-list li:hover {
+  background: #f1f5f9;
+}
+
+/* ====== Mensajes ====== */
+.loading,
+.error {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: #6b7280;
+}
+.error {
+  color: #dc2626;
+}
+
+/* ====== Separadores ====== */
+hr {
+  margin: 25px 0;
+  border: none;
+  border-top: 1px solid #e9ecef;
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+  form {
+    flex-direction: column;
+  }
+  th, td {
+    padding: 10px;
+  }
+}

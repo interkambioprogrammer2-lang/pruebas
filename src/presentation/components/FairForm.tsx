@@ -55,6 +55,14 @@ const FairForm: React.FC<Props> = ({ onSubmit, users }) => {
     setRespId('');
   };
 
+  // Función auxiliar para mostrar el nombre del usuario en el select
+  const getUserDisplayName = (user: User): string => {
+    if (user.name?.trim()) return user.name;
+    if (user.username?.trim()) return user.username;
+    if (user.email?.trim()) return user.email;
+    return `Usuario ${user.id}`;
+  };
+
   return (
     <div className="card" style={{ marginBottom: '20px' }}>
       <h2>Crear Feria</h2>
@@ -122,7 +130,7 @@ const FairForm: React.FC<Props> = ({ onSubmit, users }) => {
               <option value="">Seleccione responsable</option>
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
-                  {user.name || user.email || `Usuario ${user.id}`}
+                  {getUserDisplayName(user)}
                 </option>
               ))}
             </select>

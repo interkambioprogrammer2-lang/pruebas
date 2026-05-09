@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // añadido
+import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { Fair } from '../../domain/entities/Fair';
 import { User } from '../../domain/entities/User';
@@ -19,6 +19,14 @@ const formatDateForInput = (value: string): string => {
   return value;
 };
 
+// Función auxiliar para mostrar el nombre del usuario
+const getUserDisplayName = (user: User): string => {
+  if (user.name?.trim()) return user.name;
+  if (user.username?.trim()) return user.username;
+  if (user.email?.trim()) return user.email;
+  return `Usuario ${user.id}`;
+};
+
 const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
@@ -29,7 +37,7 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
     endDate: '',
     responsibleUserId: 0,
   });
-  const navigate = useNavigate(); // añadido
+  const navigate = useNavigate();
 
   const beginEdit = (fair: Fair) => {
     if (!fair.id) return;
@@ -50,27 +58,15 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
   const handleSave = async () => {
     if (!editingId) return;
     if (!formData.name.trim()) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Campo requerido',
-        text: 'El nombre de la feria es obligatorio.',
-      });
+      Swal.fire({ icon: 'warning', title: 'Campo requerido', text: 'El nombre de la feria es obligatorio.' });
       return;
     }
     if (!formData.startDate || !formData.endDate) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Fechas requeridas',
-        text: 'Debes ingresar fecha de inicio y fecha de término.',
-      });
+      Swal.fire({ icon: 'warning', title: 'Fechas requeridas', text: 'Debes ingresar fecha de inicio y fecha de término.' });
       return;
     }
     if (!formData.responsibleUserId) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Responsable requerido',
-        text: 'Debes seleccionar un responsable.',
-      });
+      Swal.fire({ icon: 'warning', title: 'Responsable requerido', text: 'Debes seleccionar un responsable.' });
       return;
     }
 
@@ -79,11 +75,7 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
       await onUpdate(editingId, formData);
       setEditingId(null);
     } catch (error: any) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error al guardar',
-        text: error?.response?.data?.message || error?.message || 'Error inesperado.',
-      });
+      Swal.fire({ icon: 'error', title: 'Error al guardar', text: error?.response?.data?.message || error?.message || 'Error inesperado.' });
     } finally {
       setSaving(false);
     }
@@ -104,11 +96,7 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
         await deleteFair.execute(id);
         onDelete();
       } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Error al eliminar la feria',
-        });
+        Swal.fire({ icon: 'error', title: 'Error', text: 'Error al eliminar la feria' });
       }
     }
   };
@@ -132,8 +120,8 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
             <th>Fecha de término</th>
             <th>Responsable</th>
             <th>Estado</th>
-            <th>Detalle</th>      {/* ahora contiene solo Editar */}
-            <th>Acciones</th>     {/* ahora contiene Abrir (botón) + Eliminar */}
+            <th>Detalle</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -200,14 +188,18 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
                       <option value={0}>Seleccione responsable</option>
                       {users.map((user) => (
                         <option key={user.id} value={user.id}>
-                          {user.name || user.email || `Usuario ${user.id}`}
+                          {getUserDisplayName(user)}
                         </option>
                       ))}
                     </select>
-                  ) : (() => {
-                    const responsibleUser = users.find((u) => u.id === fair.responsible?.id);
-                    return responsibleUser?.name || fair.responsible?.name || `Usuario ${fair.responsible?.id ?? ''}`;
-                  })()}
+                  ) : (
+                    (() => {
+                      const responsibleUser = users.find((u) => u.id === fair.responsible?.id);
+                      return responsibleUser
+                        ? getUserDisplayName(responsibleUser)
+                        : fair.responsible?.name || `Usuario ${fair.responsible?.id ?? ''}`;
+                    })()
+                  )}
                 </td>
                 <td>
                   <span className={`status-badge status-${fair.status}`}>{fair.status}</span>

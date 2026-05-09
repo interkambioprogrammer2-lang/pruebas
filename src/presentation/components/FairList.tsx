@@ -188,7 +188,7 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
                 <td className="table-actions-cell">
                   {isEditing ? (
                     <div className="table-actions">
-                      <button onClick={handleSave} disabled={saving}>
+                      <button onClick={handleSave} disabled={saving} style={{ background: '#ec9726', color: 'white' }}>
                         {saving ? 'Guardando...' : 'Guardar'}
                       </button>
                       <button className="secondary" onClick={cancelEdit} disabled={saving}>

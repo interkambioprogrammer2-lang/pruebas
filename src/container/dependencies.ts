@@ -13,6 +13,8 @@ import { SearchBooks } from '../application/book/SearchBooks';
 import { GetAllWarehouses } from '../application/warehouse/GetAllWarehouses';
 import { UserRepository } from '../infrastructure/repositories/UserRepository';
 import { GetAllUsers } from '../application/user/GetAllUsers';
+import { DeleteFair } from '../application/fair/DeleteFair';
+
 
 const fairRepo = new FairRepository();
 const bookRepo = new BookRepository();
@@ -31,3 +33,4 @@ export const downloadReport = new DownloadReport(fairRepo);
 export const searchBooks = new SearchBooks(bookRepo);
 export const getAllWarehouses = new GetAllWarehouses(warehouseRepo);
 export const getAllUsers = new GetAllUsers(userRepo);
+export const deleteFair = new DeleteFair(fairRepo);

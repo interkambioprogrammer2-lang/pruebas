@@ -61,4 +61,7 @@ export class FairRepository implements IFairRepository {
     });
     return response.data;
   }
+  async delete(id: number): Promise<void> {
+    await apiClient.delete(`/fairs/${id}`);
+}
 }

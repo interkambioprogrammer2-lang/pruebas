@@ -43,7 +43,7 @@ const FairsPage: React.FC = () => {
     <div className="page fairs-page">
       <h1>Ferias</h1>
       <FairForm onSubmit={handleCreate} users={users} />
-      <FairList fairs={fairs} users={users} onUpdate={handleUpdate} />
+<FairList fairs={fairs} users={users} onUpdate={handleUpdate} onDelete={loadFairs} />      
     </div>
   );
 };

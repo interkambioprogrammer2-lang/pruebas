@@ -48,4 +48,5 @@ export interface IFairRepository {
   recordReturn(fairId: number, returns: ReturnRequest[]): Promise<Fair>;
   getSendOutReport(fairId: number): Promise<Blob>;
   getFinalReport(fairId: number): Promise<Blob>;
+  delete(id: number): Promise<void>;
 }

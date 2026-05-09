@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { Fair } from '../../domain/entities/Fair';
 import { User } from '../../domain/entities/User';
 import { CreateFairPayload } from '../../domain/repositories/IFairRepository';
+import { deleteFair } from '../../container/dependencies'; // <-- nuevo
 
 interface Props {
   fairs: Fair[];
   users: User[];
   onUpdate: (fairId: number, fair: CreateFairPayload) => Promise<void>;
+  onDelete: () => void; // <-- nuevo: callback para refrescar la lista después de eliminar
 }
 
 const formatDateForInput = (value: string): string => {
@@ -16,7 +18,7 @@ const formatDateForInput = (value: string): string => {
   return value;
 };
 
-const FairList: React.FC<Props> = ({ fairs, users, onUpdate }) => {
+const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<CreateFairPayload>({
@@ -66,6 +68,19 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate }) => {
       alert('Error al guardar cambios: ' + (error?.response?.data?.message || error?.message || 'Error inesperado.'));
     } finally {
       setSaving(false);
+    }
+  };
+
+  // --- NUEVO: eliminar feria ---
+  const handleDelete = async (e: React.MouseEvent, id: number) => {
+    e.preventDefault();
+    if (window.confirm('¿Estás seguro de eliminar esta feria?')) {
+      try {
+        await deleteFair.execute(id);
+        onDelete();
+      } catch (error) {
+        alert('Error al eliminar la feria');
+      }
     }
   };
 
@@ -181,6 +196,13 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate }) => {
                     <div className="table-actions">
                       <button onClick={() => beginEdit(fair)} disabled={saving || !fair.id}>
                         Editar
+                      </button>
+                      {/* NUEVO: botón Eliminar */}
+                      <button onClick={(e) => handleDelete(e, fair.id!)}
+                        style={{ background: '#dc3545', color: 'white' }}
+                        disabled={saving}
+                      >
+                        Eliminar
                       </button>
                     </div>
                   )}

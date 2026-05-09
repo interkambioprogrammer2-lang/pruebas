@@ -7,51 +7,64 @@ interface DisplayItem extends DispatchItemRequest {
 }
 
 interface Props {
-  onAdd: (items: DispatchItemRequest[]) => Promise<void>;
-  onClearItems?: () => void;
+  onAdd: (items: DispatchItemRequest[]) => void;
   disabled: boolean;
 }
 
-const DispatchForm: React.FC<Props> = ({ onAdd, onClearItems, disabled }) => {
+const DispatchForm: React.FC<Props> = ({ onAdd, disabled }) => {
   const [items, setItems] = useState<DisplayItem[]>([]);
 
   const addItem = (bookId: number, quantity: number, salePrice: number, sourceLocationId: number, title: string) => {
     setItems([...items, { bookId, quantitySent: quantity, salePrice, sourceLocationId, title }]);
   };
 
-  const handleSubmit = async () => {
+  // --- NUEVO: eliminar un libro de la lista temporal ---
+  const removeItem = (index: number) => {
+    const newItems = items.filter((_, i) => i !== index);
+    setItems(newItems);
+  };
+
+  const handleSubmit = () => {
     if (items.length > 0) {
+      // Extraemos solo los campos que necesita el backend (sin title)
       const requestItems: DispatchItemRequest[] = items.map(({ title, ...rest }) => rest);
-      console.log('📤 Enviando items:', requestItems);
-      try {
-        await onAdd(requestItems);
-        console.log('✅ Items agregados exitosamente, limpiando lista');
-        setItems([]);
-        onClearItems?.();
-      } catch (error) {
-        console.error('❌ Error al agregar items, manteniendo lista:', error);
-      }
+      onAdd(requestItems);
+      setItems([]);
     }
   };
 
   return (
     <div>
       <BookAutocomplete onSelect={addItem} disabled={disabled} />
+      
       {items.length > 0 && (
-        <>
-          <ul style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-            {items.map((item, idx) => (
-              <li key={idx}>{item.title} - Cant: {item.quantitySent} - Precio: ${item.salePrice}</li>
-            ))}
-          </ul>
-          <button onClick={handleSubmit} disabled={disabled} style={{ marginTop: '1rem' }}>
-            Agregar libros al envío ({items.length})
-          </button>
-        </>
+        <ul style={{ marginTop: '10px' }}>
+          {items.map((item, idx) => (
+            <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+              <span>{item.title} – Cant: {item.quantitySent} – Precio: ${item.salePrice}</span>
+              <button
+                onClick={() => removeItem(idx)}
+                disabled={disabled}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#dc3545',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  padding: '0 5px',
+                }}
+                title="Eliminar libro"
+              >
+                ✕
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
-      {items.length === 0 && (
-        <p style={{ marginTop: '1rem', color: '#999' }}>Busca un libro y agregalo a la lista.</p>
-      )}
+
+      <button onClick={handleSubmit} disabled={items.length === 0 || disabled}>
+        Agregar libros al envío {items.length > 0 ? `(${items.length})` : ''}
+      </button>
     </div>
   );
 };

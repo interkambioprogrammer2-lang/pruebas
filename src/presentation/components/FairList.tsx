@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; // añadido
 import { Fair } from '../../domain/entities/Fair';
 import { User } from '../../domain/entities/User';
 import { CreateFairPayload } from '../../domain/repositories/IFairRepository';
-import { deleteFair } from '../../container/dependencies'; // <-- nuevo
+import { deleteFair } from '../../container/dependencies';
 
 interface Props {
   fairs: Fair[];
   users: User[];
   onUpdate: (fairId: number, fair: CreateFairPayload) => Promise<void>;
-  onDelete: () => void; // <-- nuevo: callback para refrescar la lista después de eliminar
+  onDelete: () => void;
 }
 
 const formatDateForInput = (value: string): string => {
@@ -28,6 +28,7 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
     endDate: '',
     responsibleUserId: 0,
   });
+  const navigate = useNavigate(); // añadido
 
   const beginEdit = (fair: Fair) => {
     if (!fair.id) return;
@@ -71,7 +72,6 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
     }
   };
 
-  // --- NUEVO: eliminar feria ---
   const handleDelete = async (e: React.MouseEvent, id: number) => {
     e.preventDefault();
     if (window.confirm('¿Estás seguro de eliminar esta feria?')) {
@@ -82,6 +82,10 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
         alert('Error al eliminar la feria');
       }
     }
+  };
+
+  const handleOpen = (id: number) => {
+    navigate(`/fair/${id}`);
   };
 
   if (fairs.length === 0) {
@@ -99,8 +103,8 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
             <th>Fecha de término</th>
             <th>Responsable</th>
             <th>Estado</th>
-            <th>Detalle</th>
-            <th>Acciones</th>
+            <th>Detalle</th>      {/* ahora contiene solo Editar */}
+            <th>Acciones</th>     {/* ahora contiene Abrir (botón) + Eliminar */}
           </tr>
         </thead>
         <tbody>
@@ -179,9 +183,8 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
                 <td>
                   <span className={`status-badge status-${fair.status}`}>{fair.status}</span>
                 </td>
-                <td>
-                  {fair.id ? <Link to={`/fair/${fair.id}`}>Abrir</Link> : '-'}
-                </td>
+
+                {/* DETALLE: solo Editar (y Guardar/Cancelar durante edición) */}
                 <td className="table-actions-cell">
                   {isEditing ? (
                     <div className="table-actions">
@@ -194,18 +197,33 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
                     </div>
                   ) : (
                     <div className="table-actions">
-                      <button onClick={() => beginEdit(fair)} disabled={saving || !fair.id}>
+                      <button onClick={() => beginEdit(fair)} disabled={saving || !fair.id} style={{ background: '#ec9726', color: 'white' }}>
                         Editar
-                      </button>
-                      {/* NUEVO: botón Eliminar */}
-                      <button onClick={(e) => handleDelete(e, fair.id!)}
-                        style={{ background: '#dc3545', color: 'white' }}
-                        disabled={saving}
-                      >
-                        Eliminar
                       </button>
                     </div>
                   )}
+                </td>
+
+                {/* ACCIONES: Abrir (botón) + Eliminar */}
+                <td className="table-actions-cell">
+                  <div className="table-actions">
+                    {fair.id && (
+                      <button
+                        onClick={() => handleOpen(fair.id!)}
+                        style={{ background: '#2c6fce', color: 'white' }}
+                        disabled={saving}
+                      >
+                        Abrir
+                      </button>
+                    )}
+                    <button
+                      onClick={(e) => handleDelete(e, fair.id!)}
+                      style={{ background: '#dc3545', color: 'white' }}
+                      disabled={saving}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 </td>
               </tr>
             );

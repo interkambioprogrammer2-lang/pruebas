@@ -4,7 +4,8 @@ import { Warehouse } from '../../domain/entities/Warehouse';
 import { searchBooks, getAllWarehouses } from '../../container/dependencies';
 
 interface Props {
-  onSelect: (bookId: number, quantity: number, salePrice: number, sourceLocationId: number) => void;
+  // Ahora onSelect recibe también el título
+  onSelect: (bookId: number, quantity: number, salePrice: number, sourceLocationId: number, title: string) => void;
   disabled: boolean;
 }
 
@@ -87,7 +88,7 @@ const BookAutocomplete: React.FC<Props> = ({ onSelect, disabled }) => {
 
   const handleAddItem = () => {
     if (selectedBook && quantity > 0 && salePrice > 0 && locationId !== '') {
-      onSelect(selectedBook.id, quantity, salePrice, locationId as number);
+      onSelect(selectedBook.id, quantity, salePrice, locationId as number, selectedBook.title);
       // limpiar formulario
       setSelectedBook(null);
       setQuantity(1);

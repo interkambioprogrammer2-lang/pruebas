@@ -40,7 +40,9 @@ const FairDetailPage: React.FC = () => {
   const loadFair = async () => {
     if (!id) return;
     try {
+      console.log('🔄 Cargando feria...', id);
       const data = await getFairDetail.execute(Number(id));
+      console.log('📥 Feria cargada:', data);
       setFair(data);
     } catch (error) {
       console.error('Error cargando feria', error);
@@ -55,13 +57,26 @@ const FairDetailPage: React.FC = () => {
   }, [id]);
 
   const handleAddItems = async (items: DispatchItemRequest[]) => {
-    await addDispatchItems.execute(Number(id), items);
-    loadFair();
+    try {
+      console.log('📨 handleAddItems llamado con:', items);
+      await addDispatchItems.execute(Number(id), items);
+      console.log('✅ addDispatchItems completado, llamando loadFair');
+      await loadFair();
+      console.log('✅ loadFair completado');
+    } catch (error: any) {
+      console.error('Error detallado:', error.response?.data);
+      alert('Error al agregar libros: ' + getErrorMessage(error, 'No se pudieron agregar los libros.'));
+      throw error;
+    }
   };
 
   const handleConfirm = async () => {
-    await confirmDispatch.execute(Number(id));
-    loadFair();
+    try {
+      await confirmDispatch.execute(Number(id));
+      loadFair();
+    } catch (error: any) {
+      alert('Error al confirmar envío: ' + getErrorMessage(error, 'No se pudo confirmar el envío.'));
+    }
   };
 
   const handleReturn = async (returns: ReturnRequest[]) => {
@@ -151,15 +166,17 @@ const FairDetailPage: React.FC = () => {
 
       <hr />
 
-      {(fair.status === 'DRAFT' || fair.status === 'OPEN') && (
+      {fair.status === 'OPEN' && (
         <div className="card">
           <h2>Agregar libros al envío</h2>
           <DispatchForm onAdd={handleAddItems} disabled={false} />
-          <button onClick={handleConfirm} className="confirm-dispatch-btn">Confirmar envío</button>
+          {fair.dispatchItems && fair.dispatchItems.length > 0 && (
+            <button onClick={handleConfirm} className="confirm-dispatch-btn">Confirmar envío</button>
+          )}
         </div>
       )}
 
-      {fair.status !== 'DRAFT' && fair.dispatchItems && fair.dispatchItems.length > 0 && (
+      {fair.dispatchItems && fair.dispatchItems.length > 0 && (
         <div className="card">
           <h2>Libros enviados</h2>
           <div className="table-responsive">

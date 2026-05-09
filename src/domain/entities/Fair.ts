@@ -2,7 +2,6 @@ import { DispatchItem } from './DispatchItem';
 
 
 export enum FairStatus {
-  DRAFT = 'DRAFT',
   OPEN = 'OPEN',
   DISPATCHED = 'DISPATCHED',
   CLOSED = 'CLOSED',

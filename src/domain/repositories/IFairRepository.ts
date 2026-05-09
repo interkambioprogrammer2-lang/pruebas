@@ -36,7 +36,6 @@ export interface CreateFairPayload {
   startDate: string;
   endDate: string;
   responsibleUserId: number;
-  status?: any;   // <-- ahora es opcional
 }
 
 export interface IFairRepository {

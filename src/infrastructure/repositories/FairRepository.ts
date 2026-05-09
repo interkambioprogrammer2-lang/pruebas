@@ -9,8 +9,13 @@ import { Fair } from '../../domain/entities/Fair';
 
 export class FairRepository implements IFairRepository {
   async getAll(): Promise<Fair[]> {
-    const { data } = await apiClient.get<Fair[]>('/fairs');
-    return data;
+    try {
+      const { data } = await apiClient.get<Fair[]>('/fairs');
+      return data;
+    } catch (error) {
+      console.error('Error fetching fairs:', error);
+      throw error;
+    }
   }
 
   async getById(id: number): Promise<Fair> {

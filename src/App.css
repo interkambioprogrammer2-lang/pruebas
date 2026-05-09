@@ -19,7 +19,7 @@ body {
 }
 
 .container {
-  width: min(100%);
+  max-width: 100%;           /* antes: width: min(100%); */
   margin: 0 auto;
   background: #ffffff;
   border-radius: 16px;
@@ -202,7 +202,7 @@ li .status-badge {
 }
 
 /* ====== Badges de estado ====== */
-.status-DRAFT { background: #fef3c7; color: #92400e; }
+.status-OPEN { background: #fef3c7; color: #92400e; }
 .status-DISPATCHED { background: #dbeafe; color: #1e40af; }
 .status-CLOSED { background: #dcfce7; color: #166534; }
 
@@ -218,24 +218,23 @@ li .status-badge {
 
 /* ====== Tablas ====== */
 table {
-  width: 100%;
+  min-width: 600px; /* asegura que columnas no se colapsen; en pantallas pequeñas se hace scroll */
   border-collapse: separate;
   border-spacing: 0;
-  background: white;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-  margin: 20px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .table-responsive {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  margin: 10px 0;
 }
 
 .table-responsive table {
-  min-width: 760px;
+  min-width: 600px;
   margin: 0;
 }
 
@@ -249,6 +248,7 @@ th {
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 td {
@@ -285,7 +285,7 @@ tr:hover td {
   background: white;
   border-radius: 12px;
   padding: 20px;
-  margin: 20px 0;
+  margin: 15px 0;
   border: 1px solid #e9ecef;
   box-shadow: 0 2px 8px rgba(0,0,0,0.03);
 }
@@ -406,7 +406,7 @@ tr:hover td {
 .selected-book-card {
   border: 1px solid #dbe3ef;
   border-radius: 10px;
-  padding: 12px;
+  padding: 10px;
   background: #f8fafc;
 }
 
@@ -422,7 +422,7 @@ tr:hover td {
 
 .selected-book-fields {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   margin-top: 10px;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -434,7 +434,7 @@ tr:hover td {
   gap: 4px;
   color: #334155;
   font-size: 0.9rem;
-  flex: 1 1 170px;
+  flex: 1 1 150px;
 }
 
 .selected-book-field input,
@@ -489,7 +489,7 @@ tr:hover td {
   justify-content: space-between;
   align-items: center;
   margin: 0;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: none;
   border-bottom: 1px solid #f1f5f9;
   border-left: none;
@@ -516,7 +516,7 @@ tr:hover td {
 
 /* ====== Separadores ====== */
 hr {
-  margin: 25px 0;
+  margin: 15px 0;
   border: none;
   border-top: 1px solid #e9ecef;
 }
@@ -533,12 +533,12 @@ hr {
 }
 
 @media (max-width: 768px) {
-  body {
-    padding: 14px 10px;
+  table-responsive table {
+    min-width: 500px;
   }
 
   .container {
-    padding: 16px;
+    padding: 12px;
     border-radius: 12px;
   }
 
@@ -549,7 +549,7 @@ hr {
 
   h2 {
     font-size: 1.2rem;
-    margin: 18px 0 12px;
+    margin: 18px 0 10px;
   }
 
   form {
@@ -609,7 +609,8 @@ hr {
 
   th,
   td {
-    padding: 10px;
+    padding: 6px 8px;
+    font-size: 0.85rem;
   }
 }
 

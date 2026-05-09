@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Fair } from '../../domain/entities/Fair';
+import { removeDispatchItem } from '../../container/dependencies';
 import { DispatchItemRequest, ReturnRequest, CreateFairPayload } from '../../domain/repositories/IFairRepository';
 import {
   getFairDetail,
@@ -130,123 +131,131 @@ const FairDetailPage: React.FC = () => {
   if (!fair) return <div className="error">No se encontró la feria</div>;
 
   return (
-    <div className="page fair-detail-page">
-      <Link to="/" className="secondary">← Volver a ferias</Link>
-      <h1>{fair.name}</h1>
-      <div className="fair-meta-grid">
-        <p><strong>Lugar:</strong> {fair.place || 'No especificado'}</p>
-        <p><strong>Fechas:</strong> {fair.startDate} – {fair.endDate}</p>
-        <p><strong>Estado:</strong> <span className={`status-badge status-${fair.status}`}>{fair.status}</span></p>
-      </div>
+  <div>
+    <Link to="/" className="secondary">← Volver a ferias</Link>
+    <h1>{fair.name}</h1>
+    
+    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', marginBottom: '10px' }}>
+      <p><strong>Lugar:</strong> {fair.place || 'No especificado'}</p>
+      <p><strong>Fechas:</strong> {fair.startDate} – {fair.endDate}</p>
+      <p>
+        <strong>Estado:</strong> 
+        <span className={`status-badge status-${fair.status}`}>{fair.status}</span>
+      </p>
+    </div>
 
-      <div className="page-actions">
-        <button onClick={handleDownloadSendOut}>📄 Descargar PDF de envío</button>
-        {fair.status === 'CLOSED' && (
-          <button onClick={handleDownloadFinal}>📊 Descargar resumen final</button>
-        )}
-        <button onClick={() => setEditing(!editing)}>✏️ Editar</button>
-      </div>
-
-      {editing && (
-        <EditFairForm
-          initial={{
-            id: fair.id!,
-            name: fair.name,
-            place: fair.place,
-            startDate: fair.startDate,
-            endDate: fair.endDate,
-            responsibleUserId: fair.responsibleUserId ?? fair.responsible?.id ?? 0,
-            status: fair.status,
-          }}
-          users={users} 
-          onSave={handleEditSave}
-          onCancel={() => setEditing(false)}
-        />
-      )}
-
-      <hr />
-
-      {fair.status === 'OPEN' && (
-        <div className="card">
-          <h2>Agregar libros al envío</h2>
-          <DispatchForm onAdd={handleAddItems} disabled={false} />
-          {fair.dispatchItems && fair.dispatchItems.length > 0 && (
-            <button onClick={handleConfirm} className="confirm-dispatch-btn">Confirmar envío</button>
-          )}
-        </div>
-      )}
-
-      {fair.dispatchItems && fair.dispatchItems.length > 0 && (
-        <div className="card">
-          <h2>Libros enviados</h2>
-          <div className="table-responsive">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID Libro</th>
-                  <th>Título</th>
-                  <th>Precio venta</th>
-                  <th>Fecha envío</th>
-                  <th>Fecha retorno</th>
-                  <th>Enviado</th>
-                  <th>Retornado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fair.dispatchItems.map(item => (
-                  <tr key={item.id}>
-                    <td>{item.bookId}</td>
-                    <td>{item.title}</td>
-                    <td>${item.salePrice}</td>
-                    <td>{item.sentDate ? new Date(item.sentDate).toLocaleDateString() : '-'}</td>
-                    <td>{item.returnedDate ? new Date(item.returnedDate).toLocaleDateString() : '-'}</td>
-                    <td>{item.quantitySent}</td>
-                    <td>{item.quantityReturned ?? '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {fair.status === 'DISPATCHED' && (
-        <div className="card">
-          <h2>Registrar retorno</h2>
-          <ReturnForm items={fair.dispatchItems || []} onReturn={handleReturn} />
-        </div>
-      )}
-
-      {fair.status === 'CLOSED' && fair.dispatchItems && (
-        <div className="card">
-          <h2>Resumen final</h2>
-          <div className="table-responsive">
-            <table>
-              <thead>
-                <tr>
-                  <th>Título</th>
-                  <th>Enviado</th>
-                  <th>Retornado</th>
-                  <th>Vendido (calc)</th>
-                  <th>Faltantes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fair.dispatchItems.map(item => (
-                  <tr key={item.id}>
-                    <td>{item.title}</td>
-                    <td>{item.quantitySent}</td>
-                    <td>{item.quantityReturned ?? '-'}</td>
-                    <td>{(item.quantitySent - (item.quantityReturned || 0))}</td>
-                    <td>{(item as any).faltantes ?? ''}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+    <div>
+      <button onClick={handleDownloadSendOut}>📄 PDF de envío</button>
+      {fair.status === 'CLOSED' && (
+        <button onClick={handleDownloadFinal}>📊 PDF resumen final</button>
       )}
     </div>
+
+    <hr />
+
+    {/* Sección de envío (solo OPEN) */}
+    {fair.status === 'OPEN' && (
+      <div className="card">
+        <h2>Agregar libros al envío</h2>
+        <DispatchForm onAdd={handleAddItems} disabled={false} />
+        <button onClick={handleConfirm} style={{ marginTop: '10px' }}>Confirmar envío</button>
+      </div>
+    )}
+
+    {/* Tabla de libros enviados (cuando ya no es OPEN) */}
+    {fair.dispatchItems && fair.dispatchItems.length > 0 && (
+      <div className="card">
+        <h2>Libros enviados</h2>
+        <div className="table-responsive">
+          <table style={{ minWidth: '700px' }}>
+            <thead>
+              <tr>
+                <th>ID Libro</th>
+                <th>Título</th>
+                <th>Precio venta</th>
+                <th>Fecha envío</th>
+                <th>Fecha retorno</th>
+                <th>Enviado</th>
+                <th>Retornado</th>
+                {fair.status === 'OPEN' && <th>Acción</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {fair.dispatchItems.map(item => (
+                <tr key={item.id}>
+                  <td>{item.bookId}</td>
+                  <td>{item.title}</td>
+                  <td>${item.salePrice}</td>
+                  <td>{item.sentDate ? new Date(item.sentDate).toLocaleDateString() : '-'}</td>
+                  <td>{item.returnedDate ? new Date(item.returnedDate).toLocaleDateString() : '-'}</td>
+                  <td>{item.quantitySent}</td>
+                  <td>{item.quantityReturned ?? '-'}</td>
+                  {fair.status === 'OPEN' && (
+                    <td>
+                      <button
+                        className="danger"
+                        onClick={async () => {
+                          if (window.confirm('¿Eliminar este libro de la feria?')) {
+                            try {
+                              await removeDispatchItem.execute(Number(id), item.id);
+                              loadFair();
+                            } catch (error: any) {
+                              alert('Error al eliminar: ' + (error.response?.data?.message || error.message));
+                            }
+                          }
+                        }}
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )}
+
+    {/* Formulario de retorno (DISPATCHED) */}
+    {fair.status === 'DISPATCHED' && (
+      <div className="card">
+        <h2>Registrar retorno</h2>
+        <ReturnForm items={fair.dispatchItems || []} onReturn={handleReturn} />
+      </div>
+    )}
+
+    {/* Resumen final (CLOSED) */}
+    {fair.status === 'CLOSED' && fair.dispatchItems && (
+      <div className="card">
+        <h2>Resumen final</h2>
+        <div className="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Enviado</th>
+                <th>Retornado</th>
+                <th>Vendido (calc)</th>
+                <th>Faltantes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fair.dispatchItems.map(item => (
+                <tr key={item.id}>
+                  <td>{item.title}</td>
+                  <td>{item.quantitySent}</td>
+                  <td>{item.quantityReturned ?? '-'}</td>
+                  <td>{(item.quantitySent - (item.quantityReturned || 0))}</td>
+                  <td>{(item as any).faltantes ?? ''}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )}
+  </div>
   );
 };
 

@@ -49,4 +49,5 @@ export interface IFairRepository {
   getSendOutReport(fairId: number): Promise<Blob>;
   getFinalReport(fairId: number): Promise<Blob>;
   delete(id: number): Promise<void>;
+  removeDispatchItem(fairId: number, itemId: number): Promise<void>;
 }

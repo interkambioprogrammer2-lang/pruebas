@@ -63,5 +63,8 @@ export class FairRepository implements IFairRepository {
   }
   async delete(id: number): Promise<void> {
     await apiClient.delete(`/fairs/${id}`);
-}
+  }
+  async removeDispatchItem(fairId: number, itemId: number): Promise<void> {
+    await apiClient.delete(`/fairs/${fairId}/dispatch-items/${itemId}`);
+  }
 }

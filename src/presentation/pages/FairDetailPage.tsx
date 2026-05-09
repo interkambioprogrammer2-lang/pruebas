@@ -151,7 +151,7 @@ const FairDetailPage: React.FC = () => {
 
       <hr />
 
-      {fair.status === 'DRAFT' && (
+      {(fair.status === 'DRAFT' || fair.status === 'OPEN') && (
         <div className="card">
           <h2>Agregar libros al envío</h2>
           <DispatchForm onAdd={handleAddItems} disabled={false} />

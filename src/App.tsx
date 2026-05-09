@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import FairsPage from './presentation/pages/FairsPage';
 import FairBooksPage from './presentation/pages/FairBooksPage';
 import FairDetailPage from './presentation/pages/FairDetailPage';
+import 'sweetalert2/dist/sweetalert2.min.css';
+
 
 
 function App() {

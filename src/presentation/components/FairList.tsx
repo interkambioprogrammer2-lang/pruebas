@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // añadido
+import Swal from 'sweetalert2';
 import { Fair } from '../../domain/entities/Fair';
 import { User } from '../../domain/entities/User';
 import { CreateFairPayload } from '../../domain/repositories/IFairRepository';
@@ -49,15 +50,27 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
   const handleSave = async () => {
     if (!editingId) return;
     if (!formData.name.trim()) {
-      alert('El nombre de la feria es obligatorio.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campo requerido',
+        text: 'El nombre de la feria es obligatorio.',
+      });
       return;
     }
     if (!formData.startDate || !formData.endDate) {
-      alert('Debes ingresar fecha de inicio y fecha de término.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Fechas requeridas',
+        text: 'Debes ingresar fecha de inicio y fecha de término.',
+      });
       return;
     }
     if (!formData.responsibleUserId) {
-      alert('Debes seleccionar un responsable.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Responsable requerido',
+        text: 'Debes seleccionar un responsable.',
+      });
       return;
     }
 
@@ -66,7 +79,11 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
       await onUpdate(editingId, formData);
       setEditingId(null);
     } catch (error: any) {
-      alert('Error al guardar cambios: ' + (error?.response?.data?.message || error?.message || 'Error inesperado.'));
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al guardar',
+        text: error?.response?.data?.message || error?.message || 'Error inesperado.',
+      });
     } finally {
       setSaving(false);
     }
@@ -74,12 +91,24 @@ const FairList: React.FC<Props> = ({ fairs, users, onUpdate, onDelete }) => {
 
   const handleDelete = async (e: React.MouseEvent, id: number) => {
     e.preventDefault();
-    if (window.confirm('¿Estás seguro de eliminar esta feria?')) {
+    const result = await Swal.fire({
+      icon: 'warning',
+      title: '¿Eliminar feria?',
+      text: '¿Estás seguro de que deseas eliminar esta feria?',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    });
+    if (result.isConfirmed) {
       try {
         await deleteFair.execute(id);
         onDelete();
       } catch (error) {
-        alert('Error al eliminar la feria');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error al eliminar la feria',
+        });
       }
     }
   };

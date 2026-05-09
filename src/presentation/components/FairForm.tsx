@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Swal from 'sweetalert2';
 import { CreateFairPayload } from '../../domain/repositories/IFairRepository';
 import { User } from '../../domain/entities/User';
 
@@ -22,11 +23,19 @@ const FairForm: React.FC<Props> = ({ onSubmit, users }) => {
 
     // Validaciones de fecha
     if (start < getToday()) {
-      alert('La fecha de inicio debe ser mayor o igual a la fecha actual.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Fecha inválida',
+        text: 'La fecha de inicio debe ser mayor o igual a la fecha actual.',
+      });
       return;
     }
     if (end < start) {
-      alert('La fecha de término debe ser mayor o igual a la fecha de inicio.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Fecha inválida',
+        text: 'La fecha de término debe ser mayor o igual a la fecha de inicio.',
+      });
       return;
     }
 

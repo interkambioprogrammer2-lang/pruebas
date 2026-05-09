@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Swal from 'sweetalert2';
 import { CreateFairPayload } from '../../domain/repositories/IFairRepository';
 import { User } from '../../domain/entities/User';
 
@@ -33,7 +34,11 @@ const EditFairForm: React.FC<Props> = ({ initial, users, onSave, onCancel }) => 
     e.preventDefault();
 
     if (!responsibleUserId) {
-      alert('Debes seleccionar un responsable.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Responsable requerido',
+        text: 'Debes seleccionar un responsable.',
+      });
       return;
     }
 

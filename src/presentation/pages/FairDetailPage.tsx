@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'; // 1. importar useEffect
 import { Link, useParams } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { Fair } from '../../domain/entities/Fair';
 import { removeDispatchItem } from '../../container/dependencies';
 import { DispatchItemRequest, ReturnRequest } from '../../domain/repositories/IFairRepository';
@@ -50,7 +51,11 @@ const FairDetailPage: React.FC = () => {
       await addDispatchItems.execute(Number(id), items);
       await loadFair();
     } catch (error: any) {
-      alert('Error al agregar libros: ' + getErrorMessage(error, 'No se pudieron agregar los libros.'));
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al agregar libros',
+        text: getErrorMessage(error, 'No se pudieron agregar los libros.'),
+      });
       throw error;
     }
   };
@@ -60,7 +65,11 @@ const FairDetailPage: React.FC = () => {
       await confirmDispatch.execute(Number(id));
       loadFair();
     } catch (error: any) {
-      alert('Error al confirmar envío: ' + getErrorMessage(error, 'No se pudo confirmar el envío.'));
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al confirmar envío',
+        text: getErrorMessage(error, 'No se pudo confirmar el envío.'),
+      });
     }
   };
 
@@ -81,7 +90,11 @@ const FairDetailPage: React.FC = () => {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (error: any) {
-      alert('Error al descargar PDF de envío: ' + (error.response?.data?.message || error.message));
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al descargar PDF',
+        text: error.response?.data?.message || error.message,
+      });
     }
   };
 
@@ -97,7 +110,11 @@ const FairDetailPage: React.FC = () => {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (error: any) {
-      alert('Error al descargar PDF final: ' + (error.response?.data?.message || error.message));
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al descargar resumen',
+        text: error.response?.data?.message || error.message,
+      });
     }
   };
 
@@ -184,12 +201,24 @@ const FairDetailPage: React.FC = () => {
                             className="danger"
                             style={{ background: '#dc3545', color: 'white' }}
                             onClick={async () => {
-                              if (window.confirm('¿Eliminar este libro de la feria?')) {
+                              const result = await Swal.fire({
+                                icon: 'warning',
+                                title: '¿Eliminar este libro?',
+                                text: '¿Estás seguro de que deseas eliminar este libro de la feria?',
+                                showCancelButton: true,
+                                confirmButtonText: 'Sí, eliminar',
+                                cancelButtonText: 'Cancelar',
+                              });
+                              if (result.isConfirmed) {
                                 try {
                                   await removeDispatchItem.execute(Number(id), item.id);
                                   loadFair();
                                 } catch (error: any) {
-                                  alert('Error al eliminar: ' + (error.response?.data?.message || error.message));
+                                  Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error al eliminar',
+                                    text: error.response?.data?.message || error.message,
+                                  });
                                 }
                               }
                             }}

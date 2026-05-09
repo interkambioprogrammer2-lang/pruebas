@@ -158,7 +158,7 @@ const FairDetailPage: React.FC = () => {
       <div className="card">
         <h2>Agregar libros al envío</h2>
         <DispatchForm onAdd={handleAddItems} disabled={false} />
-        <button onClick={handleConfirm} style={{ marginTop: '10px' }}>Confirmar envío</button>
+        <button onClick={handleConfirm} style={{ background: '#098a3f', color: 'white' }}>Confirmar envío</button>
       </div>
     )}
 
@@ -194,6 +194,7 @@ const FairDetailPage: React.FC = () => {
                     <td>
                       <button
                         className="danger"
+                        style={{ background: '#dc3545', color: 'white' }}
                         onClick={async () => {
                           if (window.confirm('¿Eliminar este libro de la feria?')) {
                             try {

@@ -36,7 +36,6 @@ const ReturnForm: React.FC<Props> = ({ items, onReturn }) => {
 
   return (
     <div>
-      <h3>Registro de retorno</h3>
       <div className="table-responsive">
         <table>
           <thead>

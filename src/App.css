@@ -19,7 +19,7 @@ body {
 }
 
 .container {
-  width: min(1200px, 100%);
+  width: min(100%);
   margin: 0 auto;
   background: #ffffff;
   border-radius: 16px;

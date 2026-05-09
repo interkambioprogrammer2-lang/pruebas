@@ -40,7 +40,7 @@ const FairForm: React.FC<Props> = ({ onSubmit, users }) => {
           </option>
         ))}
       </select>
-      <button type="submit">Crear Feria</button>
+      <button type="submit" style={{ background: '#098a3f', color: 'white' }}>Crear Feria</button>
     </form>
   );
 };

@@ -37,41 +37,43 @@ const ReturnForm: React.FC<Props> = ({ items, onReturn }) => {
   return (
     <div>
       <h3>Registro de retorno</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Título</th>
-            <th>Enviado</th>
-            <th>Retornado</th>
-            <th>Vendido (manual)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map(item => (
-            <tr key={item.id}>
-              <td>{item.title}</td>
-              <td>{item.quantitySent}</td>
-              <td>
-                <input
-                  type="number"
-                  min="0"
-                  max={item.quantitySent}
-                  value={returns[item.id]?.returned ?? ''}
-                  onChange={(e) => handleChange(item.id, 'returned', e.target.value)}
-                />
-              </td>
-              <td>
-                <input
-                  type="number"
-                  min="0"
-                  value={returns[item.id]?.soldManual ?? ''}
-                  onChange={(e) => handleChange(item.id, 'soldManual', e.target.value)}
-                />
-              </td>
+      <div className="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Enviado</th>
+              <th>Retornado</th>
+              <th>Vendido (manual)</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {items.map(item => (
+              <tr key={item.id}>
+                <td>{item.title}</td>
+                <td>{item.quantitySent}</td>
+                <td>
+                  <input
+                    type="number"
+                    min="0"
+                    max={item.quantitySent}
+                    value={returns[item.id]?.returned ?? ''}
+                    onChange={(e) => handleChange(item.id, 'returned', e.target.value)}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    min="0"
+                    value={returns[item.id]?.soldManual ?? ''}
+                    onChange={(e) => handleChange(item.id, 'soldManual', e.target.value)}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <button onClick={handleSubmit}>Registrar retorno</button>
     </div>
   );

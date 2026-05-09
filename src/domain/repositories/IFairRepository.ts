@@ -43,6 +43,7 @@ export interface IFairRepository {
   getAll(): Promise<Fair[]>;
   getById(id: number): Promise<Fair>;
   create(fair: CreateFairPayload): Promise<Fair>;
+  update(fairId: number, fair: CreateFairPayload): Promise<Fair>;
   addDispatchItems(fairId: number, items: DispatchItemRequest[]): Promise<Fair>;
   confirmDispatch(fairId: number): Promise<Fair>;
   recordReturn(fairId: number, returns: ReturnRequest[]): Promise<Fair>;

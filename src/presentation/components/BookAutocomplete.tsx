@@ -12,31 +12,68 @@ const BookAutocomplete: React.FC<Props> = ({ onSelect, disabled }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Book[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState('');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [salePrice, setSalePrice] = useState(0);
   const [locationId, setLocationId] = useState<number | ''>('');
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const requestIdRef = useRef(0);
 
   // Cargar almacenes al montar
   useEffect(() => {
-    getAllWarehouses.execute().then(setWarehouses);
+    getAllWarehouses.execute().then(setWarehouses).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   // Búsqueda con debounce
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
+    setSearchError('');
+
     if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    const normalized = value.trim();
+    if (normalized.length < 2) {
+      setResults([]);
+      setShowResults(false);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
     debounceRef.current = setTimeout(async () => {
-      if (value.length >= 2) {
-        const books = await searchBooks.execute(value);
+      const currentRequestId = ++requestIdRef.current;
+      try {
+        const books = await searchBooks.execute(normalized);
+        if (currentRequestId !== requestIdRef.current) return;
         setResults(books);
         setShowResults(true);
-      } else {
+      } catch {
+        if (currentRequestId !== requestIdRef.current) return;
         setResults([]);
-        setShowResults(false);
+        setSearchError('No se pudo completar la búsqueda.');
+        setShowResults(true);
+      } finally {
+        if (currentRequestId === requestIdRef.current) {
+          setIsSearching(false);
+        }
       }
     }, 300);
   };
@@ -60,29 +97,43 @@ const BookAutocomplete: React.FC<Props> = ({ onSelect, disabled }) => {
   };
 
   return (
-    <div style={{ marginBottom: '1rem' }}>
+    <div className="autocomplete-section" ref={wrapperRef}>
       {/* Campo de búsqueda (oculto cuando hay libro seleccionado) */}
       {!selectedBook && (
-        <div>
+        <div className="autocomplete-wrapper">
           <input
             type="text"
             placeholder="Buscar por SKU, ISBN o título..."
             value={query}
             onChange={handleInputChange}
             disabled={disabled}
-            style={{ width: '100%', padding: '8px' }}
+            className="autocomplete-input"
           />
-          {showResults && results.length > 0 && (
-            <ul style={{ border: '1px solid #ccc', listStyle: 'none', padding: 0 }}>
-              {results.map((book) => (
-                <li
-                  key={book.id}
-                  onClick={() => handleSelectBook(book)}
-                  style={{ padding: '8px', cursor: 'pointer', borderBottom: '1px solid #eee' }}
-                >
-                  {book.sku} - {book.title} ({book.isbn})
-                </li>
-              ))}
+          <p className="autocomplete-hint">Escribe al menos 2 caracteres para buscar.</p>
+
+          {showResults && (
+            <ul className="autocomplete-list">
+              {isSearching && <li className="autocomplete-feedback">Buscando...</li>}
+
+              {!isSearching && searchError && (
+                <li className="autocomplete-feedback autocomplete-feedback-error">{searchError}</li>
+              )}
+
+              {!isSearching && !searchError && results.length === 0 && (
+                <li className="autocomplete-feedback">No se encontraron libros.</li>
+              )}
+
+              {!isSearching &&
+                !searchError &&
+                results.map((book) => (
+                  <li
+                    key={book.id}
+                    onClick={() => handleSelectBook(book)}
+                    className="autocomplete-item"
+                  >
+                    {book.sku} - {book.title} ({book.isbn})
+                  </li>
+                ))}
             </ul>
           )}
         </div>
@@ -90,10 +141,13 @@ const BookAutocomplete: React.FC<Props> = ({ onSelect, disabled }) => {
 
       {/* Formulario para cantidad, precio y almacén */}
       {selectedBook && (
-        <div style={{ border: '1px solid #ddd', padding: '10px', marginTop: '10px' }}>
-          <strong>{selectedBook.title}</strong> (SKU: {selectedBook.sku})
-          <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
-            <label>
+        <div className="selected-book-card">
+          <p className="selected-book-title">
+            {selectedBook.title} <span>(SKU: {selectedBook.sku})</span>
+          </p>
+
+          <div className="selected-book-fields">
+            <label className="selected-book-field">
               Cantidad:
               <input
                 type="number"
@@ -101,10 +155,9 @@ const BookAutocomplete: React.FC<Props> = ({ onSelect, disabled }) => {
                 value={quantity}
                 onChange={(e) => setQuantity(Number(e.target.value))}
                 disabled={disabled}
-                style={{ width: '80px', marginLeft: '5px' }}
               />
             </label>
-            <label>
+            <label className="selected-book-field">
               Precio venta:
               <input
                 type="number"
@@ -113,16 +166,14 @@ const BookAutocomplete: React.FC<Props> = ({ onSelect, disabled }) => {
                 value={salePrice}
                 onChange={(e) => setSalePrice(Number(e.target.value))}
                 disabled={disabled}
-                style={{ width: '100px', marginLeft: '5px' }}
               />
             </label>
-            <label>
+            <label className="selected-book-field">
               Almacén:
               <select
                 value={locationId}
                 onChange={(e) => setLocationId(Number(e.target.value))}
                 disabled={disabled}
-                style={{ marginLeft: '5px' }}
               >
                 <option value="">-- Seleccione --</option>
                 {warehouses.map((w) => (
@@ -131,11 +182,12 @@ const BookAutocomplete: React.FC<Props> = ({ onSelect, disabled }) => {
               </select>
             </label>
           </div>
-          <div style={{ marginTop: '10px' }}>
+
+          <div className="selected-book-actions">
             <button onClick={handleAddItem} disabled={disabled || locationId === '' || quantity <= 0 || salePrice <= 0}>
               Agregar a la lista
             </button>
-            <button onClick={() => setSelectedBook(null)} style={{ marginLeft: '10px' }}>
+            <button onClick={() => setSelectedBook(null)} className="secondary">
               Cancelar
             </button>
           </div>

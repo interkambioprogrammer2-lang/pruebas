@@ -1,5 +1,6 @@
 import { DispatchItem } from './DispatchItem';
 
+
 export enum FairStatus {
   DRAFT = 'DRAFT',
   DISPATCHED = 'DISPATCHED',
@@ -7,12 +8,13 @@ export enum FairStatus {
 }
 
 export interface Fair {
-  id?: number;
+  id: number;
   name: string;
   place: string;
   startDate: string;
   endDate: string;
-  responsible: { id: number; name: string };
+  responsible?: { id: number; name: string };   // puede seguir estando si se usa en otros lados
+  responsibleUserId?: number;                    // ← NUEVO, para el detalle
   status: FairStatus;
   dispatchItems?: DispatchItem[];
 }

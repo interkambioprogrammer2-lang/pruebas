@@ -1,5 +1,10 @@
 import apiClient from '../http/apiClient';
-import { IFairRepository, DispatchItemRequest, ReturnRequest, CreateFairPayload } from '../../domain/repositories/IFairRepository';
+import {
+  IFairRepository,
+  DispatchItemRequest,
+  ReturnRequest,
+  CreateFairPayload
+} from '../../domain/repositories/IFairRepository';
 import { Fair } from '../../domain/entities/Fair';
 
 export class FairRepository implements IFairRepository {
@@ -15,6 +20,11 @@ export class FairRepository implements IFairRepository {
 
   async create(fair: CreateFairPayload): Promise<Fair> {
     const { data } = await apiClient.post<Fair>('/fairs', fair);
+    return data;
+  }
+
+  async update(id: number, fair: CreateFairPayload): Promise<Fair> {
+    const { data } = await apiClient.put<Fair>(`/fairs/${id}`, fair);
     return data;
   }
 
@@ -34,12 +44,16 @@ export class FairRepository implements IFairRepository {
   }
 
   async getSendOutReport(fairId: number): Promise<Blob> {
-    const response = await apiClient.get(`/fairs/${fairId}/report/sendout`, { responseType: 'blob' });
+    const response = await apiClient.get(`/fairs/${fairId}/report/sendout`, {
+      responseType: 'blob',
+    });
     return response.data;
   }
 
   async getFinalReport(fairId: number): Promise<Blob> {
-    const response = await apiClient.get(`/fairs/${fairId}/report/final`, { responseType: 'blob' });
+    const response = await apiClient.get(`/fairs/${fairId}/report/final`, {
+      responseType: 'blob',
+    });
     return response.data;
   }
 }

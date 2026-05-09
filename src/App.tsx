@@ -9,12 +9,14 @@ import FairDetailPage from './presentation/pages/FairDetailPage';
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<FairsPage />} />
-        <Route path="/fair/:id" element={<FairDetailPage />} />
-        <Route path="/fairs/:fairId/books" element={<FairBooksPage />} />
-        <Route path="/fair/:id" element={<FairDetailPage />} />
-      </Routes>
+      <div className="container app-shell">
+        <Routes>
+          <Route path="/" element={<FairsPage />} />
+          <Route path="/fair/:id" element={<FairDetailPage />} />
+          <Route path="/fairs/:fairId/books" element={<FairBooksPage />} />
+          <Route path="/fair/:id" element={<FairDetailPage />} />
+        </Routes>
+      </div>
     </Router>
   );
 }

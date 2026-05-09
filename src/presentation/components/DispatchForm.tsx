@@ -22,16 +22,27 @@ const DispatchForm: React.FC<Props> = ({ onAdd, disabled }) => {
   };
 
   return (
-    <div>
+    <div className="dispatch-form">
       <BookAutocomplete onSelect={addItem} disabled={disabled} />
-      <ul>
-        {items.map((item, idx) => (
-          <li key={idx}>Libro #{item.bookId} - Cant: {item.quantitySent}</li>
-        ))}
-      </ul>
-      <button onClick={handleSubmit} disabled={items.length === 0 || disabled}>
-        Agregar libros al envío
-      </button>
+
+      <div className="dispatch-items-panel">
+        {items.length === 0 ? (
+          <p className="dispatch-items-empty">Aún no hay libros agregados.</p>
+        ) : (
+          <ul className="dispatch-items-list">
+            {items.map((item, idx) => (
+              <li key={idx}>
+                <span>Libro #{item.bookId}</span>
+                <span>Cant: {item.quantitySent}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <button onClick={handleSubmit} disabled={disabled || items.length === 0}>
+          Agregar libros al envío
+        </button>
+      </div>
     </div>
   );
 };

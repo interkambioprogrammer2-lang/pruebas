@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Fair } from '../../domain/entities/Fair';
 import { CreateFairPayload } from '../../domain/repositories/IFairRepository';
-import { getFairs, createFair, getAllUsers } from '../../container/dependencies';
+import { getFairs, createFair, updateFair, getAllUsers } from '../../container/dependencies';
 import FairList from '../components/FairList';
 import FairForm from '../components/FairForm';
 import { User } from '../../domain/entities/User';
@@ -34,11 +34,16 @@ const FairsPage: React.FC = () => {
     loadFairs();
   };
 
+  const handleUpdate = async (fairId: number, fair: CreateFairPayload) => {
+    await updateFair.execute(fairId, fair);
+    loadFairs();
+  };
+
   return (
-    <div>
+    <div className="page fairs-page">
       <h1>Ferias</h1>
       <FairForm onSubmit={handleCreate} users={users} />
-      <FairList fairs={fairs} />
+      <FairList fairs={fairs} users={users} onUpdate={handleUpdate} />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // 1. importar useEffect
+import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { Fair } from '../../domain/entities/Fair';
@@ -40,11 +40,22 @@ const FairDetailPage: React.FC = () => {
     }
   };
 
-  // 2. Ejecutar loadFair al montar / cuando cambie el id
   useEffect(() => {
     setLoading(true);
     loadFair();
   }, [id]);
+
+  // Consulta el stock actual de un libro en un almacén
+  const getStockDisponible = async (bookId: number, warehouseId: number): Promise<number> => {
+    try {
+      const response = await fetch(`/api/books/${bookId}/stock?warehouseId=${warehouseId}`);
+      if (!response.ok) throw new Error('No se pudo obtener el stock');
+      const data = await response.json();
+      return data.available;
+    } catch (error) {
+      return 0; // si falla, asumimos 0 para mostrar alerta
+    }
+  };
 
   const handleAddItems = async (items: DispatchItemRequest[]) => {
     try {
@@ -61,8 +72,68 @@ const FairDetailPage: React.FC = () => {
   };
 
   const handleConfirm = async () => {
+    if (!fair?.dispatchItems || fair.dispatchItems.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Sin libros',
+        text: 'No hay libros agregados para confirmar el envío.',
+      });
+      return;
+    }
+
+    // Verificar stock disponible para cada libro
+    const stockChecks = await Promise.all(
+      fair.dispatchItems.map(async (item) => {
+        const warehouseId = item.sourceLocation?.id || 1; // Ajusta según tu lógica, el almacén es el sourceLocation
+        const disponible = await getStockDisponible(item.bookId, warehouseId);
+        return { ...item, disponible };
+      })
+    );
+
+    const insufficient = stockChecks.filter(item => item.disponible < item.quantitySent);
+
+    if (insufficient.length > 0) {
+      // Construir tabla con los libros que no tienen stock suficiente
+      const lista = insufficient.map(item => 
+        `<tr>
+          <td>${item.title}</td>
+          <td>${item.quantitySent}</td>
+          <td style="color:red">${item.disponible}</td>
+        </tr>`
+      ).join('');
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Stock insuficiente',
+        html: `
+          <p>Los siguientes libros no tienen suficiente stock en el almacén seleccionado:</p>
+          <table border="1" cellpadding="5" style="margin:0 auto; text-align:center; border-collapse:collapse;">
+            <thead>
+              <tr style="background:#f1f5f9;">
+                <th>Título</th>
+                <th>Solicitado</th>
+                <th>Disponible</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${lista}
+            </tbody>
+          </table>
+          <p style="margin-top:10px">Por favor ajusta las cantidades o selecciona otro almacén.</p>
+        `,
+        confirmButtonText: 'Entendido',
+      });
+      return;
+    }
+
+    // Si todos tienen stock suficiente, confirmar normalmente
     try {
       await confirmDispatch.execute(Number(id));
+      Swal.fire({
+        icon: 'success',
+        title: 'Envío confirmado',
+        text: 'El inventario ha sido actualizado correctamente.',
+      });
       loadFair();
     } catch (error: any) {
       Swal.fire({
@@ -74,8 +145,21 @@ const FairDetailPage: React.FC = () => {
   };
 
   const handleReturn = async (returns: ReturnRequest[]) => {
-    await recordReturn.execute(Number(id), returns);
-    loadFair();
+    try {
+      await recordReturn.execute(Number(id), returns);
+      Swal.fire({
+        icon: 'success',
+        title: 'Retorno registrado',
+        text: 'El inventario ha sido actualizado.',
+      });
+      loadFair();
+    } catch (error: any) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al registrar retorno',
+        text: getErrorMessage(error, 'No se pudo registrar el retorno.'),
+      });
+    }
   };
 
   const handleDownloadSendOut = async () => {

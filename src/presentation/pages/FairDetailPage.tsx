@@ -13,6 +13,7 @@ import {
 } from '../../container/dependencies';
 import DispatchForm from '../components/DispatchForm';
 import ReturnForm from '../components/ReturnForm';
+import apiClient from '../../infrastructure/http/apiClient';
 
 const FairDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -48,12 +49,13 @@ const FairDetailPage: React.FC = () => {
   // Consulta el stock actual de un libro en un almacén
   const getStockDisponible = async (bookId: number, warehouseId: number): Promise<number> => {
     try {
-      const response = await fetch(`/api/books/${bookId}/stock?warehouseId=${warehouseId}`);
+      const response = await fetch(`http://localhost:8080/api/books/${bookId}/stock?warehouseId=${warehouseId}`);
       if (!response.ok) throw new Error('No se pudo obtener el stock');
       const data = await response.json();
       return data.available;
     } catch (error) {
-      return 0; // si falla, asumimos 0 para mostrar alerta
+      console.error('Error obteniendo stock', error);
+      return 0;
     }
   };
 

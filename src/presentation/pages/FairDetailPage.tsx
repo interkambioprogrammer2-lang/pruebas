@@ -251,7 +251,7 @@ const FairDetailPage: React.FC = () => {
       try {
         // Eliminar el ítem actual
         await removeDispatchItem.execute(Number(id), item.id);
-        // Agregar uno nuevo con los valores actualizados
+        // Agregar uno nuevo con los valores actualizados, conservando sourceLocationId original
         await addDispatchItems.execute(Number(id), [{
           bookId: item.bookId,
           quantitySent: formValues.quantity,

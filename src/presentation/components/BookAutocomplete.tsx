@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Book } from '../../domain/entities/Book';
 import { searchBooks } from '../../container/dependencies';
 import apiClient from '../../infrastructure/http/apiClient';
-import { BookSearchResultItem, StockLocation } from '../../domain/entities/Book'; // importa las nuevas interfaces
+import { BookSearchResultItem, StockLocation } from '../../domain/entities/Book';
+import Swal from 'sweetalert2';
 
 interface Props {
   onSelect: (bookId: number, quantity: number, salePrice: number, sourceLocationId: number, title: string) => void;
@@ -15,12 +16,10 @@ const BookAutocomplete: React.FC<Props> = ({ onSelect, disabled }) => {
   const [showResults, setShowResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
-
   const [selectedBook, setSelectedBook] = useState<BookSearchResultItem | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [salePrice, setSalePrice] = useState(0);
   const [selectedLocationId, setSelectedLocationId] = useState<number | ''>('');
-
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const requestIdRef = useRef(0);
@@ -53,7 +52,6 @@ const BookAutocomplete: React.FC<Props> = ({ onSelect, disabled }) => {
     debounceRef.current = setTimeout(async () => {
       const currentRequestId = ++requestIdRef.current;
       try {
-        // Llamada al nuevo endpoint que incluye el stock
         const response = await apiClient.get('/books/search-with-stock', { params: { term: normalized } });
         if (currentRequestId !== requestIdRef.current) return;
         setResults(response.data as BookSearchResultItem[]);
@@ -73,22 +71,32 @@ const BookAutocomplete: React.FC<Props> = ({ onSelect, disabled }) => {
 
   const handleSelectBook = (book: BookSearchResultItem) => {
     setSelectedBook(book);
-    // Precio sugerido del libro (del campo price)
     setSalePrice(parseFloat(book.price) || 0);
     setShowResults(false);
     setQuery('');
-    // Las ubicaciones ya vienen cargadas en book.stockLocations
-    setSelectedLocationId(''); // resetear selección
+    setSelectedLocationId('');
   };
 
   const handleAddItem = () => {
-    if (selectedBook && quantity > 0 && salePrice > 0 && selectedLocationId !== '') {
-      onSelect(selectedBook.id, quantity, salePrice, selectedLocationId as number, selectedBook.title);
-      setSelectedBook(null);
-      setQuantity(1);
-      setSalePrice(0);
-      setSelectedLocationId('');
+    if (!selectedBook) return;
+    if (quantity <= 0) {
+      Swal.fire({ icon: 'warning', title: 'Cantidad inválida', text: 'La cantidad debe ser mayor a 0.' });
+      return;
     }
+    if (salePrice <= 0) {
+      Swal.fire({ icon: 'warning', title: 'Precio inválido', text: 'El precio debe ser mayor a 0.' });
+      return;
+    }
+    if (selectedLocationId === '') {
+      Swal.fire({ icon: 'warning', title: 'Ubicación requerida', text: 'Selecciona una ubicación de stock.' });
+      return;
+    }
+
+    onSelect(selectedBook.id, quantity, salePrice, selectedLocationId as number, selectedBook.title);
+    setSelectedBook(null);
+    setQuantity(1);
+    setSalePrice(0);
+    setSelectedLocationId('');
   };
 
   return (
@@ -114,30 +122,31 @@ const BookAutocomplete: React.FC<Props> = ({ onSelect, disabled }) => {
               {!isSearching && !searchError && results.length === 0 && (
                 <li className="autocomplete-feedback">No se encontraron libros con stock disponible.</li>
               )}
-              {!isSearching && !searchError && results.map((book) => (
-                <li
-                  key={book.id}
-                  onClick={() => handleSelectBook(book)}
-                  className="autocomplete-item"
-                >
-                  <div>
-                    <strong>{book.sku} - {book.title}</strong> <span>({book.isbn})</span>
-                    <div style={{ fontSize: '0.85rem', marginTop: 4 }}>
-                      Precio sugerido: ${book.price}
-                    </div>
-                    {/* Mostrar ubicaciones de stock */}
-                    {book.stockLocations.length === 0 && (
-                      <div style={{ color: 'red', fontSize: '0.8rem' }}>Sin stock disponible</div>
-                    )}
-                    {book.stockLocations.map((loc) => (
-                      <div key={loc.id} style={{ fontSize: '0.8rem', marginLeft: 10 }}>
-                        {loc.warehouseName} — Estante {loc.bookcase}, Piso {loc.bookcaseFloor} |
-                        Stock: <strong>{loc.stock}</strong> | Condición: {loc.condition}
+              {!isSearching &&
+                !searchError &&
+                results.map((book) => (
+                  <li
+                    key={book.id}
+                    onClick={() => handleSelectBook(book)}
+                    className="autocomplete-item"
+                  >
+                    <div>
+                      <strong>{book.sku} - {book.title}</strong> <span>({book.isbn})</span>
+                      <div style={{ fontSize: '0.85rem', marginTop: 4 }}>
+                        Precio sugerido: ${book.price}
                       </div>
-                    ))}
-                  </div>
-                </li>
-              ))}
+                      {book.stockLocations.length === 0 && (
+                        <div style={{ color: 'red', fontSize: '0.8rem' }}>Sin stock disponible</div>
+                      )}
+                      {book.stockLocations.map((loc) => (
+                        <div key={loc.id} style={{ fontSize: '0.8rem', marginLeft: 10 }}>
+                          🏢 {loc.warehouseName} — Estante {loc.bookcase}, Piso {loc.bookcaseFloor} |
+                          Stock: <strong>{loc.stock}</strong> | Condición: {loc.condition}
+                        </div>
+                      ))}
+                    </div>
+                  </li>
+                ))}
             </ul>
           )}
         </div>
@@ -193,7 +202,10 @@ const BookAutocomplete: React.FC<Props> = ({ onSelect, disabled }) => {
           </div>
 
           <div className="selected-book-actions" style={{ marginTop: 10 }}>
-            <button onClick={handleAddItem} disabled={disabled || selectedLocationId === '' || quantity <= 0 || salePrice <= 0}>
+            <button
+              onClick={handleAddItem}
+              disabled={disabled || selectedLocationId === '' || quantity <= 0 || salePrice <= 0}
+            >
               Agregar a la lista
             </button>
             <button onClick={() => { setSelectedBook(null); setSelectedLocationId(''); }} className="secondary">

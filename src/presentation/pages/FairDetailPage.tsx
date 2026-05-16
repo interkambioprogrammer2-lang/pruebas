@@ -60,6 +60,26 @@ const FairDetailPage: React.FC = () => {
   };
 
   const handleAddItems = async (items: DispatchItemRequest[]) => {
+    // Verificar duplicados
+    const existingBookIds = fair?.dispatchItems?.map(item => item.bookId) || [];
+    const duplicates = items.filter(item => existingBookIds.includes(item.bookId));
+
+    if (duplicates.length > 0) {
+      const duplicateTitles = duplicates.map(dup => {
+        const existing = fair?.dispatchItems?.find(d => d.bookId === dup.bookId);
+        return existing?.title || `Libro #${dup.bookId}`;
+      }).join(', ');
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Libros ya agregados',
+        html: `<p>Los siguientes libros ya están en la lista de envío:</p><p><strong>${duplicateTitles}</strong></p>`,
+        confirmButtonText: 'Entendido',
+      });
+      return;
+    }
+
+    // Si no hay duplicados, agregar normalmente
     try {
       await addDispatchItems.execute(Number(id), items);
       await loadFair();
@@ -86,7 +106,7 @@ const FairDetailPage: React.FC = () => {
     // Verificar stock disponible para cada libro
     const stockChecks = await Promise.all(
       fair.dispatchItems.map(async (item) => {
-        const warehouseId = item.sourceLocation?.id || 1; // Ajusta según tu lógica, el almacén es el sourceLocation
+        const warehouseId = item.sourceLocation?.id || 1;
         const disponible = await getStockDisponible(item.bookId, warehouseId);
         return { ...item, disponible };
       })
@@ -95,7 +115,6 @@ const FairDetailPage: React.FC = () => {
     const insufficient = stockChecks.filter(item => item.disponible < item.quantitySent);
 
     if (insufficient.length > 0) {
-      // Construir tabla con los libros que no tienen stock suficiente
       const lista = insufficient.map(item => 
         `<tr>
           <td>${item.title}</td>
@@ -128,7 +147,6 @@ const FairDetailPage: React.FC = () => {
       return;
     }
 
-    // Si todos tienen stock suficiente, confirmar normalmente
     try {
       await confirmDispatch.execute(Number(id));
       Swal.fire({
@@ -201,6 +219,58 @@ const FairDetailPage: React.FC = () => {
         title: 'Error al descargar resumen',
         text: error.response?.data?.message || error.message,
       });
+    }
+  };
+
+  // Función para editar un libro (elimina y vuelve a agregar con nuevos valores)
+  const handleEditItem = async (item: any) => {
+    const { value: formValues } = await Swal.fire({
+      title: 'Editar libro',
+      html: `
+        <label>Cantidad:</label>
+        <input id="swal-quantity" class="swal2-input" type="number" value="${item.quantitySent}" min="1">
+        <label>Precio venta:</label>
+        <input id="swal-price" class="swal2-input" type="number" value="${item.salePrice}" min="0" step="0.01">
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Guardar',
+      cancelButtonText: 'Cancelar',
+      preConfirm: () => {
+        const quantity = (document.getElementById('swal-quantity') as HTMLInputElement)?.value;
+        const price = (document.getElementById('swal-price') as HTMLInputElement)?.value;
+        if (!quantity || !price) {
+          Swal.showValidationMessage('Ambos campos son obligatorios');
+          return false;
+        }
+        return { quantity: Number(quantity), price: Number(price) };
+      }
+    });
+
+    if (formValues) {
+      try {
+        // Eliminar el ítem actual
+        await removeDispatchItem.execute(Number(id), item.id);
+        // Agregar uno nuevo con los valores actualizados
+        await addDispatchItems.execute(Number(id), [{
+          bookId: item.bookId,
+          quantitySent: formValues.quantity,
+          salePrice: formValues.price,
+          sourceLocationId: item.sourceLocation?.id || item.sourceLocationId || 1,
+        }]);
+        loadFair();
+        Swal.fire({
+          icon: 'success',
+          title: 'Libro actualizado',
+          text: 'Los cambios se han guardado correctamente.',
+        });
+      } catch (error: any) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al editar',
+          text: error.response?.data?.message || error.message,
+        });
+      }
     }
   };
 
@@ -283,34 +353,42 @@ const FairDetailPage: React.FC = () => {
                       <td>{item.quantityReturned ?? '-'}</td>
                       {fair.status === 'OPEN' && (
                         <td>
-                          <button
-                            className="danger"
-                            style={{ background: '#dc3545', color: 'white' }}
-                            onClick={async () => {
-                              const result = await Swal.fire({
-                                icon: 'warning',
-                                title: '¿Eliminar este libro?',
-                                text: '¿Estás seguro de que deseas eliminar este libro de la feria?',
-                                showCancelButton: true,
-                                confirmButtonText: 'Sí, eliminar',
-                                cancelButtonText: 'Cancelar',
-                              });
-                              if (result.isConfirmed) {
-                                try {
-                                  await removeDispatchItem.execute(Number(id), item.id);
-                                  loadFair();
-                                } catch (error: any) {
-                                  Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error al eliminar',
-                                    text: error.response?.data?.message || error.message,
-                                  });
+                          <div className="table-actions">
+                            <button
+                              onClick={() => handleEditItem(item)}
+                              style={{ background: '#ec9726', color: 'white', marginRight: '5px' }}
+                            >
+                              Editar
+                            </button>
+                            <button
+                              className="danger"
+                              style={{ background: '#dc3545', color: 'white' }}
+                              onClick={async () => {
+                                const result = await Swal.fire({
+                                  icon: 'warning',
+                                  title: '¿Eliminar este libro?',
+                                  text: '¿Estás seguro de que deseas eliminar este libro de la feria?',
+                                  showCancelButton: true,
+                                  confirmButtonText: 'Sí, eliminar',
+                                  cancelButtonText: 'Cancelar',
+                                });
+                                if (result.isConfirmed) {
+                                  try {
+                                    await removeDispatchItem.execute(Number(id), item.id);
+                                    loadFair();
+                                  } catch (error: any) {
+                                    Swal.fire({
+                                      icon: 'error',
+                                      title: 'Error al eliminar',
+                                      text: error.response?.data?.message || error.message,
+                                    });
+                                  }
                                 }
-                              }
-                            }}
-                          >
-                            Eliminar
-                          </button>
+                              }}
+                            >
+                              Eliminar
+                            </button>
+                          </div>
                         </td>
                       )}
                     </tr>
